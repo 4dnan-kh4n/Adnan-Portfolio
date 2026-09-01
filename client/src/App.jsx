@@ -69,17 +69,20 @@ function Home() {
           gsap.utils.toArray(".section-label").forEach((label) => gsap.fromTo(label, { x: -24 }, { x: 0, scrollTrigger: { trigger: label, start: "top 88%", end: "top 56%", scrub: 0.4 } }));
         }
       }, root);
-      gsap.set(cursor.current, { x: -100, y: -100 });
-      const moveX = gsap.quickTo(cursor.current, "x", { duration: 0.24, ease: "power3.out" });
-      const moveY = gsap.quickTo(cursor.current, "y", { duration: 0.24, ease: "power3.out" });
-      const onMove = (event) => { if (event.pointerType === "mouse") { moveX(event.clientX); moveY(event.clientY); } };
-      window.addEventListener("pointermove", onMove);
-      cleanup = () => { cancelAnimationFrame(frame); lenis.destroy(); context.revert(); window.removeEventListener("pointermove", onMove); };
+      cleanup = () => { cancelAnimationFrame(frame); lenis.destroy(); context.revert(); };
     });
     return () => {
       cancelled = true;
       cleanup();
     };
+  }, [reduceMotion]);
+  useEffect(() => {
+    if (reduceMotion) return undefined;
+    const moveCursor = ({ clientX, clientY, pointerType }) => {
+      if (pointerType === "mouse" && cursor.current) cursor.current.style.transform = `translate(${clientX}px, ${clientY}px)`;
+    };
+    window.addEventListener("pointermove", moveCursor);
+    return () => window.removeEventListener("pointermove", moveCursor);
   }, [reduceMotion]);
 
   return (
@@ -119,7 +122,6 @@ function Home() {
               alt="Adnan Khan editorial portrait"
               fetchPriority="high"
             />
-            <figcaption>Portrait / 01</figcaption>
           </motion.figure>
           <h1>{headlineEnd === undefined ? portfolio?.hero?.headline : <><span>{headlineStart}</span><em>useful</em><span>{headlineEnd}</span></>}</h1>
           <div className="hero-bottom">
