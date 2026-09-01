@@ -1,0 +1,24 @@
+{
+  "name": "adnan-portfolio-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "check": "node --test",
+    "seed:admin": "node scripts/seedAdmin.js",
+    "seed:portfolio": "node scripts/seedPortfolio.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.11.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^8.18.0",
+    "multer": "^2.3.0"
+  }
+}
