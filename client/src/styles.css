@@ -31,3 +31,4 @@
 .not-found { align-content:center; background:#0e0f10; color:#f3efe9; display:grid; gap:24px; min-height:100vh; padding:clamp(24px,8vw,120px); } .not-found p { color:#caff48; font-size:12px; letter-spacing:.12em; text-transform:uppercase; } .not-found h1 { font-size:clamp(3.5rem,10vw,10rem); line-height:.86; max-width:980px; } .not-found a { border-bottom:1px solid #caff48; color:#caff48; font-size:14px; justify-self:start; padding-bottom:7px; }
 .custom-cursor { transform:translate(-100px,-100px); transition:transform .14s ease-out; }
 .project-art img { inset:0; object-position:center; position:absolute; } .project-links { display:flex; flex-wrap:wrap; gap:12px; margin-top:28px; } .project-links a { background:#171816; color:#f3efe9; font-size:13px; padding:11px 14px; } .project-links a:hover { background:#caff48; color:#141510; }
+.project-art img { object-fit:contain; } .project-card:hover .project-art img { transform:none; }
