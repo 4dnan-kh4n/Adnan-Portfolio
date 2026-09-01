@@ -312,6 +312,10 @@ function Home() {
               {(selectedProject.stack || selectedProject.techStack).join(" · ")}
             </span>
             <p>{selectedProject.description}</p>
+            {(selectedProject.liveLink || selectedProject.githubLink) && <div className="project-links">
+              {selectedProject.liveLink && <a href={selectedProject.liveLink} target="_blank" rel="noreferrer">Live project ↗</a>}
+              {selectedProject.githubLink && <a href={selectedProject.githubLink} target="_blank" rel="noreferrer">GitHub ↗</a>}
+            </div>}
           </article>
         </div>
       )}
