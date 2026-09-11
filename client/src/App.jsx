@@ -36,17 +36,22 @@ function LoadingPuzzle() {
   const [puzzle, setPuzzle] = useState(makePuzzle);
   const [solved, setSolved] = useState(0);
   const [message, setMessage] = useState("");
+  const [selected, setSelected] = useState(null);
+  const nextPuzzleTimer = useRef();
+  useEffect(() => () => clearTimeout(nextPuzzleTimer.current), []);
   const choose = (position) => {
-    if (position !== puzzle.position) return setMessage("Not that one. Try again.");
+    const correct = position === puzzle.position;
+    setSelected({ position, correct });
+    if (!correct) return setMessage("Not that one. Try again.");
     setSolved((value) => value + 1);
-    setPuzzle(makePuzzle());
     setMessage("Solved. Here’s another one.");
+    nextPuzzleTimer.current = setTimeout(() => { setPuzzle(makePuzzle()); setSelected(null); }, 700);
   };
   return <section className="loading-puzzle" aria-labelledby="puzzle-title">
     <div className="puzzle-meta"><span>While you wait / 01</span><b>Solved {solved}</b></div>
     <h2 id="puzzle-title">Find the different symbol.</h2>
     <div className="puzzle-grid" role="group" aria-label="Find the different symbol">
-      {Array.from({ length: 9 }, (_, position) => <button type="button" key={position} onClick={() => choose(position)} aria-label={`Choose symbol ${position + 1}`}>{position === puzzle.position ? puzzle.odd : puzzle.common}</button>)}
+      {Array.from({ length: 9 }, (_, position) => <button type="button" key={position} onClick={() => choose(position)} disabled={selected?.correct} className={selected?.position === position ? `is-${selected.correct ? "correct" : "wrong"}` : ""} aria-label={`Choose symbol ${position + 1}`}>{position === puzzle.position ? puzzle.odd : puzzle.common}</button>)}
     </div>
     <p className="puzzle-feedback" aria-live="polite">{message}</p>
   </section>;
@@ -55,21 +60,28 @@ function Home() {
   const [portfolio, setPortfolio] = useState(null);
   const [showWelcome, setShowWelcome] = useState(false);
   const [loadError, setLoadError] = useState("");
+  const [ready, setReady] = useState(false);
   const [attempt, setAttempt] = useState(0);
+  const welcomeShown = useRef(false);
 
   useEffect(() => {
     const controller = new AbortController();
-    const timer = setTimeout(() => setShowWelcome(true), 800);
+    let portfolioTimer;
+    welcomeShown.current = false;
+    const timer = setTimeout(() => { welcomeShown.current = true; setShowWelcome(true); }, 800);
     api.get("/public/portfolio", { signal: controller.signal, timeout: 120000 })
       .then(({ data }) => {
         if (!data || typeof data !== "object" || !data.hero) throw new Error("Invalid portfolio response");
-        if (!controller.signal.aborted) setPortfolio(data);
+        if (controller.signal.aborted) return;
+        if (!welcomeShown.current) return setPortfolio(data);
+        setReady(true);
+        portfolioTimer = setTimeout(() => setPortfolio(data), 1100);
       })
       .catch(() => {
         if (!controller.signal.aborted) setLoadError("We couldn't load the portfolio. Please try again.");
       })
       .finally(() => clearTimeout(timer));
-    return () => { clearTimeout(timer); controller.abort(); };
+    return () => { clearTimeout(timer); clearTimeout(portfolioTimer); controller.abort(); };
   }, [attempt]);
 
   if (portfolio) return <Portfolio portfolio={portfolio} />;
@@ -81,13 +93,16 @@ function Home() {
         <h1>Welcome to Adnan’s <em>portfolio.</em></h1>
         {loadError ? <>
           <p className="loading-copy" role="alert">{loadError}</p>
-          <button type="button" onClick={() => { setLoadError(""); setShowWelcome(false); setAttempt((value) => value + 1); }}>Try again ↗</button>
+          <button type="button" onClick={() => { setLoadError(""); setReady(false); setShowWelcome(false); setAttempt((value) => value + 1); }}>Try again ↗</button>
+        </> : ready ? <>
+          <p className="loading-copy loading-ready">You’re ready to be redirected.</p>
+          <div className="loading-status" role="status"><i aria-hidden="true" /><span>Opening portfolio</span></div>
         </> : <>
           <p className="loading-copy">Getting things ready—this first visit may take a moment.</p>
           <div className="loading-status" role="status"><i aria-hidden="true" /><span>Fetching portfolio</span></div>
         </>}
       </div>
-      {!loadError && <LoadingPuzzle />}
+      {!loadError && !ready && <LoadingPuzzle />}
     </section>}
   </main>;
 }
