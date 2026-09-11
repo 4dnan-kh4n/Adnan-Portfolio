@@ -34,3 +34,33 @@
 .project-art img { object-fit:contain; } .project-card:hover .project-art img { transform:none; }
 @media (max-width:760px) { .hero { min-height:90svh; } .orb-one { height:72vw; left:50%; right:auto; top:10%; translate:-50% 0; width:72vw; } .hero-portrait { border:4px solid rgba(202,255,72,.55); bottom:auto; display:block!important; left:50%; opacity:.68; right:auto; top:12%; translate:-50% 0; width:min(52vw,220px); } .hero-portrait img { object-position:center 35%; } .certificate-frame { display:block!important; justify-self:start; margin:14px 0 4px; width:min(150px,52vw); } }
 @media (max-width:760px) { .hero-portrait { left:auto; right:clamp(18px,7vw,28px); top:clamp(150px,25vh,210px); translate:0 -50%; width:min(29vw,125px); } }
+.portfolio-loading { min-height:100svh; display:grid; align-items:center; padding:clamp(24px,7vw,90px); background:#0e0f10; color:#f3efe9; }
+.loading-panel { width:min(100%, 1100px); margin:auto; }
+.portfolio-loading h1 { font-size:clamp(2.8rem,8vw,6rem); line-height:1; margin:24px 0; overflow-wrap:break-word; }
+.portfolio-loading p { line-height:1.6; }
+.portfolio-loading button { margin-top:24px; padding:12px 20px; border:0; border-radius:8px; background:#caff48; color:#141510; }
+.portfolio-loading { isolation:isolate; overflow:hidden; position:relative; }
+.portfolio-loading::before,.portfolio-loading::after { border-radius:50%; content:""; filter:blur(2px); pointer-events:none; position:absolute; z-index:-1; }
+.portfolio-loading::before { background:radial-gradient(circle at 38% 35%,#caff48,rgba(116,141,45,.72) 42%,transparent 70%); height:min(56vw,720px); opacity:.42; right:-12vw; top:-14vw; width:min(56vw,720px); }
+.portfolio-loading::after { background:#293233; bottom:-20vw; height:min(42vw,520px); left:8vw; opacity:.45; width:min(42vw,520px); }
+.loading-panel { display:grid; grid-template-columns:minmax(0,1fr) minmax(270px,310px); align-items:center; gap:clamp(36px,8vw,130px); }
+.loading-intro { display:grid; gap:18px; }
+.loading-monogram { align-items:center; border:1px solid #f3efe9; border-radius:50%; display:grid; font-size:12px; font-weight:800; height:42px; letter-spacing:-.08em; margin-bottom:clamp(24px,8vh,88px); place-items:center; width:42px; }
+.loading-eyebrow { color:#a6a39e; font-size:11px; letter-spacing:.12em; text-transform:uppercase; }
+.portfolio-loading h1 { letter-spacing:-.075em; max-width:820px; }
+.loading-copy { color:#c2c0bb; font-size:clamp(16px,1.5vw,20px); max-width:480px; }
+.loading-status { align-items:center; color:#caff48; display:flex; font-size:11px; gap:10px; letter-spacing:.1em; margin-top:18px; text-transform:uppercase; }
+.loading-status i { background:#caff48; border-radius:50%; height:8px; position:relative; width:8px; }
+.loading-status i::after { border:1px solid #caff48; border-radius:50%; content:""; inset:-6px; opacity:.65; position:absolute; animation:loading-pulse 1.5s ease-out infinite; }
+@keyframes loading-pulse { 0% { transform:scale(.45); opacity:1; } 100% { transform:scale(1); opacity:0; } }
+@media (max-width:760px) { .portfolio-loading { padding:24px 20px; } .portfolio-loading::before { height:94vw; right:-25vw; top:-18vw; width:94vw; } .portfolio-loading::after { bottom:-42vw; height:78vw; left:-15vw; width:78vw; } .loading-monogram { margin-bottom:clamp(26px,10vh,76px); } .portfolio-loading h1 { font-size:clamp(3.25rem,15vw,5.5rem); } }
+@media (prefers-reduced-motion:reduce) { .loading-status i::after { animation:none; } }
+.loading-puzzle { width:100%; background:rgba(14,15,16,.72); border:1px solid rgba(202,255,72,.38); padding:16px; }
+.puzzle-meta { color:#a6a39e; display:flex; font-size:10px; justify-content:space-between; letter-spacing:.09em; text-transform:uppercase; }
+.puzzle-meta b { color:#caff48; font-weight:600; }
+.loading-puzzle h2 { font-size:20px; letter-spacing:-.04em; margin:16px 0; }
+.puzzle-grid { display:grid; gap:7px; grid-template-columns:repeat(3,1fr); }
+.puzzle-grid button { aspect-ratio:1; background:#191b18; border:1px solid #3d4532; color:#f3efe9; font-size:24px; transition:background .18s ease,color .18s ease,transform .18s ease; }
+.puzzle-grid button:hover,.puzzle-grid button:focus-visible { background:#caff48; color:#141510; outline:0; transform:scale(1.04); }
+.puzzle-feedback { color:#caff48; font-size:12px; min-height:19px; padding-top:12px; }
+@media (max-width:760px) { .loading-panel { grid-template-columns:1fr; } .loading-puzzle { max-width:280px; } .loading-puzzle h2 { font-size:18px; } }

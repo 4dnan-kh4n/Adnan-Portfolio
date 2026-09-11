@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import axios from "axios";
 import { motion, useReducedMotion } from "motion/react";
+import { makePuzzle } from "./loadingPuzzle.js";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
@@ -31,11 +32,69 @@ function NotFound() {
 }
 
 const AdminPage = lazy(() => import("./Admin.jsx"));
+function LoadingPuzzle() {
+  const [puzzle, setPuzzle] = useState(makePuzzle);
+  const [solved, setSolved] = useState(0);
+  const [message, setMessage] = useState("");
+  const choose = (position) => {
+    if (position !== puzzle.position) return setMessage("Not that one. Try again.");
+    setSolved((value) => value + 1);
+    setPuzzle(makePuzzle());
+    setMessage("Solved. Here’s another one.");
+  };
+  return <section className="loading-puzzle" aria-labelledby="puzzle-title">
+    <div className="puzzle-meta"><span>While you wait / 01</span><b>Solved {solved}</b></div>
+    <h2 id="puzzle-title">Find the different symbol.</h2>
+    <div className="puzzle-grid" role="group" aria-label="Find the different symbol">
+      {Array.from({ length: 9 }, (_, position) => <button type="button" key={position} onClick={() => choose(position)} aria-label={`Choose symbol ${position + 1}`}>{position === puzzle.position ? puzzle.odd : puzzle.common}</button>)}
+    </div>
+    <p className="puzzle-feedback" aria-live="polite">{message}</p>
+  </section>;
+}
 function Home() {
+  const [portfolio, setPortfolio] = useState(null);
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [loadError, setLoadError] = useState("");
+  const [attempt, setAttempt] = useState(0);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => setShowWelcome(true), 800);
+    api.get("/public/portfolio", { signal: controller.signal, timeout: 120000 })
+      .then(({ data }) => {
+        if (!data || typeof data !== "object" || !data.hero) throw new Error("Invalid portfolio response");
+        if (!controller.signal.aborted) setPortfolio(data);
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setLoadError("We couldn't load the portfolio. Please try again.");
+      })
+      .finally(() => clearTimeout(timer));
+    return () => { clearTimeout(timer); controller.abort(); };
+  }, [attempt]);
+
+  if (portfolio) return <Portfolio portfolio={portfolio} />;
+  return <main className="portfolio-loading" aria-busy={!loadError}>
+    {(showWelcome || loadError) && <section className="loading-panel">
+      <div className="loading-intro">
+        <span className="loading-monogram" aria-hidden="true">AK</span>
+        <p className="loading-eyebrow">Adnan Khan / Portfolio</p>
+        <h1>Welcome to Adnan’s <em>portfolio.</em></h1>
+        {loadError ? <>
+          <p className="loading-copy" role="alert">{loadError}</p>
+          <button type="button" onClick={() => { setLoadError(""); setShowWelcome(false); setAttempt((value) => value + 1); }}>Try again ↗</button>
+        </> : <>
+          <p className="loading-copy">Getting things ready—this first visit may take a moment.</p>
+          <div className="loading-status" role="status"><i aria-hidden="true" /><span>Fetching portfolio</span></div>
+        </>}
+      </div>
+      {!loadError && <LoadingPuzzle />}
+    </section>}
+  </main>;
+}
+
+function Portfolio({ portfolio }) {
   const root = useRef(null);
   const cursor = useRef(null);
-  const [portfolio, setPortfolio] = useState(null);
-  const [loadError, setLoadError] = useState("");
   const [selectedProject, setSelectedProject] = useState(null);
   const [selectedCertificate, setSelectedCertificate] = useState(null);
   const reduceMotion = useReducedMotion();
@@ -45,12 +104,6 @@ function Home() {
         number: `0${index + 1}`,
         image: project.images?.[0],
       }));
-  useEffect(() => {
-    api
-      .get("/public/portfolio")
-      .then(({ data }) => setPortfolio(data))
-      .catch(() => setLoadError("Portfolio content could not be loaded."));
-  }, []);
   useEffect(() => {
     if (reduceMotion) return undefined;
     let cancelled = false;
@@ -105,7 +158,6 @@ function Home() {
         </a>
       </header>
       <main id="top">
-        {loadError && <p className="public-error" role="alert">{loadError}</p>}
         <section className="hero">
           <div className="hero-orb orb-one" />
           <div className="hero-orb orb-two" />
