@@ -37,6 +37,7 @@ function LoadingPuzzle() {
   const [solved, setSolved] = useState(0);
   const [message, setMessage] = useState("");
   const [selected, setSelected] = useState(null);
+  const [round, setRound] = useState(0);
   const nextPuzzleTimer = useRef();
   useEffect(() => () => clearTimeout(nextPuzzleTimer.current), []);
   const choose = (position) => {
@@ -45,12 +46,12 @@ function LoadingPuzzle() {
     if (!correct) return setMessage("Not that one. Try again.");
     setSolved((value) => value + 1);
     setMessage("Solved. Here’s another one.");
-    nextPuzzleTimer.current = setTimeout(() => { setPuzzle(makePuzzle()); setSelected(null); }, 700);
+    nextPuzzleTimer.current = setTimeout(() => { setPuzzle(makePuzzle()); setSelected(null); setMessage("New puzzle — find the different symbol."); setRound((value) => value + 1); }, 700);
   };
   return <section className="loading-puzzle" aria-labelledby="puzzle-title">
     <div className="puzzle-meta"><span>While you wait / 01</span><b>Solved {solved}</b></div>
     <h2 id="puzzle-title">Find the different symbol.</h2>
-    <div className="puzzle-grid" role="group" aria-label="Find the different symbol">
+    <div className="puzzle-grid is-new" key={round} role="group" aria-label="Find the different symbol">
       {Array.from({ length: 9 }, (_, position) => <button type="button" key={position} onClick={() => choose(position)} disabled={selected?.correct} className={selected?.position === position ? `is-${selected.correct ? "correct" : "wrong"}` : ""} aria-label={`Choose symbol ${position + 1}`}>{position === puzzle.position ? puzzle.odd : puzzle.common}</button>)}
     </div>
     <p className="puzzle-feedback" aria-live="polite">{message}</p>
