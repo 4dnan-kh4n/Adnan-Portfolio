@@ -32,6 +32,26 @@ function NotFound() {
 }
 
 const AdminPage = lazy(() => import("./Admin.jsx"));
+const loadingCommands = [
+  "Fetching data from Google servers…",
+  "Calling Sundar Pichai…",
+  "Asking Mark Zuckerberg to turn on the Meta server…",
+  "Mark replied: ‘I’m turning the server on.’",
+];
+function LoadingCommands() {
+  const [command, setCommand] = useState(0);
+  useEffect(() => {
+    const timer = setInterval(() => setCommand((value) => (value + 1) % loadingCommands.length), 1800);
+    return () => clearInterval(timer);
+  }, []);
+  return <p className="loading-command" aria-live="polite"><span aria-hidden="true">›</span>{loadingCommands[command]}</p>;
+}
+function LoadingSuccess() {
+  return <section className="loading-success" aria-live="polite">
+    <span className="success-tick" aria-hidden="true">✓</span>
+    <p>Portfolio ready</p>
+  </section>;
+}
 function LoadingPuzzle() {
   const [puzzle, setPuzzle] = useState(makePuzzle);
   const [solved, setSolved] = useState(0);
@@ -76,7 +96,7 @@ function Home() {
         if (controller.signal.aborted) return;
         if (!welcomeShown.current) return setPortfolio(data);
         setReady(true);
-        portfolioTimer = setTimeout(() => setPortfolio(data), 1100);
+        portfolioTimer = setTimeout(() => setPortfolio(data), 1400);
       })
       .catch(() => {
         if (!controller.signal.aborted) setLoadError("We couldn't load the portfolio. Please try again.");
@@ -101,9 +121,10 @@ function Home() {
         </> : <>
           <p className="loading-copy">Getting things ready—this first visit may take a moment.</p>
           <div className="loading-status" role="status"><i aria-hidden="true" /><span>Fetching portfolio</span></div>
+          <LoadingCommands />
         </>}
       </div>
-      {!loadError && !ready && <LoadingPuzzle />}
+      {ready ? <LoadingSuccess /> : !loadError && <LoadingPuzzle />}
     </section>}
   </main>;
 }
