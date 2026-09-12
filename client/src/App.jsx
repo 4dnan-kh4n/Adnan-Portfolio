@@ -33,10 +33,13 @@ function NotFound() {
 
 const AdminPage = lazy(() => import("./Admin.jsx"));
 const loadingCommands = [
-  "Fetching data from Google servers…",
-  "Calling Sundar Pichai…",
-  "Asking Mark Zuckerberg to turn on the Meta server…",
-  "Mark replied: ‘I’m turning the server on.’",
+  "Polishing pixels while the server wakes up…",
+  "Trying the classic ‘turn it off and on’ trick…",
+  "Checking whether the internet had breakfast…",
+  "Calling Sundar Pichai for a tiny favour…",
+  "Meta server is warming up. Mark says: ‘Almost there.’",
+  "Convincing the cloud this portfolio is worth it…",
+  "One small server nap. One big portfolio entrance.",
 ];
 function LoadingCommands() {
   const [command, setCommand] = useState(0);
@@ -44,7 +47,11 @@ function LoadingCommands() {
     const timer = setInterval(() => setCommand((value) => (value + 1) % loadingCommands.length), 1800);
     return () => clearInterval(timer);
   }, []);
-  return <p className="loading-command" aria-live="polite"><span aria-hidden="true">›</span>{loadingCommands[command]}</p>;
+  const log = [-2, -1, 0].map((offset) => loadingCommands[(command + offset + loadingCommands.length) % loadingCommands.length]);
+  return <section className="loading-console" aria-live="polite" aria-label="Playful loading updates">
+    <p className="loading-console-title">Live server diary</p>
+    {log.map((line, index) => <p className={index === 2 ? "is-current" : ""} key={line}><span aria-hidden="true">›</span>{line}</p>)}
+  </section>;
 }
 function LoadingSuccess() {
   return <section className="loading-success" aria-live="polite">
