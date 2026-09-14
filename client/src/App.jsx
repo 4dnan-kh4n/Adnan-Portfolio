@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import axios from "axios";
-import { motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { makePuzzle } from "./loadingPuzzle.js";
 
 const api = axios.create({
@@ -321,7 +321,7 @@ function Portfolio({ portfolio }) {
                     <h3>{role}</h3>
                     <span>{company}</span>
                   </div>
-                  {item.companyLogo && <figure className="certificate-frame"><button className="certificate-button" type="button" onClick={() => setSelectedCertificate({ src: item.companyLogo, title: `${company} certificate` })} aria-label={`Open ${company} certificate`}><img src={item.companyLogo} alt={`${company} certificate — click to enlarge`} loading="lazy" decoding="async" /></button></figure>}
+                  {item.companyLogo && <figure className="certificate-frame"><button className="certificate-button" type="button" onClick={() => setSelectedCertificate({ src: item.companyLogo, title: `${company} certificate`, id: item._id })} aria-label={`Open ${company} certificate`}><motion.img layoutId={`certificate-${item._id}`} transition={{ duration: 0.3, ease: "easeInOut" }} src={item.companyLogo} alt={`${company} certificate — click to enlarge`} loading="lazy" decoding="async" /></button></figure>}
                 </article>
               );
             })}
@@ -452,7 +452,9 @@ function Portfolio({ portfolio }) {
           </article>
         </div>
       )}
-      {selectedCertificate && <div className="project-dialog image-dialog" role="dialog" aria-modal="true" aria-labelledby="certificate-dialog-title"><button className="dialog-backdrop" onClick={() => setSelectedCertificate(null)} aria-label="Close certificate" /><figure><button className="dialog-close" onClick={() => setSelectedCertificate(null)} aria-label="Close">×</button><img src={selectedCertificate.src} alt={selectedCertificate.title} /><figcaption id="certificate-dialog-title">{selectedCertificate.title}</figcaption></figure></div>}
+      <AnimatePresence>
+        {selectedCertificate && <motion.div className="project-dialog image-dialog" role="dialog" aria-modal="true" aria-labelledby="certificate-dialog-title" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><motion.button className="dialog-backdrop" onClick={() => setSelectedCertificate(null)} aria-label="Close certificate" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} /><figure><button className="dialog-close" onClick={() => setSelectedCertificate(null)} aria-label="Close">×</button><motion.img layoutId={`certificate-${selectedCertificate.id}`} transition={{ duration: 0.3, ease: "easeInOut" }} src={selectedCertificate.src} alt={selectedCertificate.title} /><figcaption id="certificate-dialog-title">{selectedCertificate.title}</figcaption></figure></motion.div>}
+      </AnimatePresence>
       <footer>
         <span>© {new Date().getFullYear()} {portfolio?.contact?.footerCopyright}</span>
         <div>
