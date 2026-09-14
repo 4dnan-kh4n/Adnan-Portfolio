@@ -176,13 +176,21 @@ function Portfolio({ portfolio }) {
   }, [reduceMotion]);
   useEffect(() => {
     if (reduceMotion || !root.current) return undefined;
-    const revealObserver = new IntersectionObserver((entries, observer) => entries.forEach((entry) => {
-      if (!entry.isIntersecting) return;
-      entry.target.classList.add("is-revealed");
-      observer.unobserve(entry.target);
-    }), { rootMargin: "0px 0px -35% 0px" });
+    const scrollStages = [...root.current.querySelectorAll(".scroll-card-stage")];
     const skillCards = [...root.current.querySelectorAll(".skill-card")];
-    const updateCenteredSkill = () => {
+    let frame = 0;
+    const update = () => {
+      const viewport = window.innerHeight;
+      scrollStages.forEach((stage) => {
+        const bounds = stage.getBoundingClientRect();
+        const progress = Math.max(0, Math.min(1, (viewport * 0.75 - bounds.top) / Math.max(1, bounds.height * 1.2)));
+        [...stage.children].filter((child) => child.matches("article")).forEach((card, index) => {
+          const localProgress = Math.max(0, Math.min(1, (progress - index * 0.29) / 0.32));
+          card.style.opacity = localProgress;
+          card.style.filter = `blur(${7 * (1 - localProgress)}px)`;
+          card.style.transform = `translateY(${42 * (1 - localProgress)}px) scale(${0.94 + 0.06 * localProgress})`;
+        });
+      });
       const viewportCenter = window.innerHeight / 2;
       const nearest = skillCards.filter((card) => {
         const { top, bottom } = card.getBoundingClientRect();
@@ -194,10 +202,11 @@ function Portfolio({ portfolio }) {
       })[0];
       skillCards.forEach((card) => card.classList.toggle("is-centered", card === nearest));
     };
-    root.current.querySelectorAll(".timeline article, .project-card").forEach((card) => revealObserver.observe(card));
-    updateCenteredSkill();
-    window.addEventListener("scroll", updateCenteredSkill, { passive: true });
-    return () => { revealObserver.disconnect(); window.removeEventListener("scroll", updateCenteredSkill); };
+    const scheduleUpdate = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(update); };
+    scheduleUpdate();
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleUpdate);
+    return () => { cancelAnimationFrame(frame); window.removeEventListener("scroll", scheduleUpdate); window.removeEventListener("resize", scheduleUpdate); };
   }, [reduceMotion]);
   useEffect(() => {
     if (reduceMotion) return undefined;
@@ -300,7 +309,7 @@ function Portfolio({ portfolio }) {
           eyebrow="03 / Experience"
           title="Internships and hands-on work."
         >
-          <div className="timeline">
+          <div className="timeline scroll-card-stage">
             {(portfolio?.experience || []).map((item) => {
               const [date, role, company] = [`${monthYear(item.startDate)}${item.present ? " — Present" : item.endDate ? ` — ${monthYear(item.endDate)}` : ""}`, item.role, item.company];
               return (
@@ -336,7 +345,7 @@ function Portfolio({ portfolio }) {
           eyebrow="04 / Projects"
           title="Things made to be explored."
         >
-          <div className="project-grid">
+          <div className="project-grid scroll-card-stage">
             {projectItems.map((project, index) => (
               <motion.article
                 layout
