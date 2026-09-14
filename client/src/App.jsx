@@ -174,6 +174,20 @@ function Portfolio({ portfolio }) {
     };
   }, [reduceMotion]);
   useEffect(() => {
+    if (reduceMotion || !root.current) return undefined;
+    const revealObserver = new IntersectionObserver((entries, observer) => entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add("is-revealed");
+      observer.unobserve(entry.target);
+    }), { threshold: 0.2 });
+    const skillObserver = new IntersectionObserver((entries) => entries.forEach((entry) => {
+      entry.target.classList.toggle("is-centered", entry.isIntersecting);
+    }), { rootMargin: "-45% 0px -45% 0px" });
+    root.current.querySelectorAll(".timeline article, .project-card").forEach((card) => revealObserver.observe(card));
+    root.current.querySelectorAll(".skill-card").forEach((card) => skillObserver.observe(card));
+    return () => { revealObserver.disconnect(); skillObserver.disconnect(); };
+  }, [reduceMotion]);
+  useEffect(() => {
     if (reduceMotion) return undefined;
     const moveCursor = ({ clientX, clientY, pointerType }) => {
       if (pointerType === "mouse" && cursor.current) cursor.current.style.transform = `translate(${clientX}px, ${clientY}px)`;
