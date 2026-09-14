@@ -182,10 +182,10 @@ function Portfolio({ portfolio }) {
     const update = () => {
       const viewport = window.innerHeight;
       scrollStages.forEach((stage) => {
-        const bounds = stage.getBoundingClientRect();
-        const progress = Math.max(0, Math.min(1, (viewport * 0.75 - bounds.top) / Math.max(1, bounds.height * 1.2)));
-        [...stage.children].filter((child) => child.matches("article")).forEach((card, index) => {
-          const localProgress = Math.max(0, Math.min(1, (progress - index * 0.29) / 0.32));
+        [...stage.children].filter((child) => child.matches("article")).forEach((card) => {
+          const { top, bottom } = card.getBoundingClientRect();
+          const cardCenter = (top + bottom) / 2;
+          const localProgress = Math.max(0, Math.min(1, (viewport * 0.85 - cardCenter) / (viewport * 0.35)));
           card.style.opacity = localProgress;
           card.style.filter = `blur(${7 * (1 - localProgress)}px)`;
           card.style.transform = `translateY(${42 * (1 - localProgress)}px) scale(${0.94 + 0.06 * localProgress})`;
