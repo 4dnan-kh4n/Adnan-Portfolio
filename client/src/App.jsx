@@ -143,6 +143,7 @@ function Portfolio({ portfolio }) {
   const [selectedCertificate, setSelectedCertificate] = useState(null);
   const reduceMotion = useReducedMotion();
   const [headlineStart, headlineEnd] = (portfolio?.hero?.headline || "").split("useful");
+  const headlineTail = headlineEnd?.trim().split(/\s+/) || [];
   const projectItems = (portfolio?.projects || []).map((project, index) => ({
         ...project,
         number: `0${index + 1}`,
@@ -179,13 +180,24 @@ function Portfolio({ portfolio }) {
       if (!entry.isIntersecting) return;
       entry.target.classList.add("is-revealed");
       observer.unobserve(entry.target);
-    }), { threshold: 0.2 });
-    const skillObserver = new IntersectionObserver((entries) => entries.forEach((entry) => {
-      entry.target.classList.toggle("is-centered", entry.isIntersecting);
-    }), { rootMargin: "-45% 0px -45% 0px" });
+    }), { rootMargin: "0px 0px -35% 0px" });
+    const skillCards = [...root.current.querySelectorAll(".skill-card")];
+    const updateCenteredSkill = () => {
+      const viewportCenter = window.innerHeight / 2;
+      const nearest = skillCards.filter((card) => {
+        const { top, bottom } = card.getBoundingClientRect();
+        return bottom > 0 && top < window.innerHeight;
+      }).sort((first, second) => {
+        const firstRect = first.getBoundingClientRect();
+        const secondRect = second.getBoundingClientRect();
+        return Math.abs((firstRect.top + firstRect.bottom) / 2 - viewportCenter) - Math.abs((secondRect.top + secondRect.bottom) / 2 - viewportCenter);
+      })[0];
+      skillCards.forEach((card) => card.classList.toggle("is-centered", card === nearest));
+    };
     root.current.querySelectorAll(".timeline article, .project-card").forEach((card) => revealObserver.observe(card));
-    root.current.querySelectorAll(".skill-card").forEach((card) => skillObserver.observe(card));
-    return () => { revealObserver.disconnect(); skillObserver.disconnect(); };
+    updateCenteredSkill();
+    window.addEventListener("scroll", updateCenteredSkill, { passive: true });
+    return () => { revealObserver.disconnect(); window.removeEventListener("scroll", updateCenteredSkill); };
   }, [reduceMotion]);
   useEffect(() => {
     if (reduceMotion) return undefined;
@@ -233,7 +245,7 @@ function Portfolio({ portfolio }) {
               fetchPriority="high"
             />
           </motion.figure>
-          <h1>{headlineEnd === undefined ? portfolio?.hero?.headline : <><span>{headlineStart}</span><em>useful</em><span>{headlineEnd}</span></>}</h1>
+          <h1>{headlineEnd === undefined ? portfolio?.hero?.headline : <><span>{headlineStart}</span><em>useful</em><span>{headlineTail.slice(0, -1).join(" ")} <span className="headline-last-word">{headlineTail.at(-1)}</span></span></>}</h1>
           <div className="hero-bottom">
             <p>{portfolio?.hero?.intro}</p>
             <div className="hero-actions">
