@@ -355,7 +355,9 @@ function Portfolio({ portfolio }) {
                 key={project.title}
               >
                 <div className="project-art">
-                  <img
+                  <motion.img
+                    layoutId={`project-${project._id || project.title}`}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
                     src={project.image}
                     alt={`Preview of ${project.title}`}
                     loading="lazy"
@@ -419,17 +421,24 @@ function Portfolio({ portfolio }) {
           </p>
         </section>
       </main>
-      {selectedProject && (
-        <div
+      <AnimatePresence>
+        {selectedProject && (
+        <motion.div
           className="project-dialog"
           role="dialog"
           aria-modal="true"
           aria-labelledby="project-dialog-title"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
         >
-          <button
+          <motion.button
             className="dialog-backdrop"
             onClick={() => setSelectedProject(null)}
             aria-label="Close project details"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
           />
           <article>
             <button
@@ -439,6 +448,7 @@ function Portfolio({ portfolio }) {
             >
               ×
             </button>
+            <motion.img className="project-dialog-preview" layoutId={`project-${selectedProject._id || selectedProject.title}`} transition={{ duration: 0.3, ease: "easeInOut" }} src={selectedProject.image} alt={`Preview of ${selectedProject.title}`} />
             <p>{selectedProject.category}</p>
             <h2 id="project-dialog-title">{selectedProject.title}</h2>
             <span>
@@ -450,8 +460,9 @@ function Portfolio({ portfolio }) {
               {selectedProject.githubLink && <a href={selectedProject.githubLink} target="_blank" rel="noreferrer">GitHub ↗</a>}
             </div>}
           </article>
-        </div>
-      )}
+        </motion.div>
+        )}
+      </AnimatePresence>
       <AnimatePresence>
         {selectedCertificate && <motion.div className="project-dialog image-dialog" role="dialog" aria-modal="true" aria-labelledby="certificate-dialog-title" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><motion.button className="dialog-backdrop" onClick={() => setSelectedCertificate(null)} aria-label="Close certificate" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} /><figure><button className="dialog-close" onClick={() => setSelectedCertificate(null)} aria-label="Close">×</button><motion.img layoutId={`certificate-${selectedCertificate.id}`} transition={{ duration: 0.3, ease: "easeInOut" }} src={selectedCertificate.src} alt={selectedCertificate.title} /><figcaption id="certificate-dialog-title">{selectedCertificate.title}</figcaption></figure></motion.div>}
       </AnimatePresence>
